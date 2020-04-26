@@ -1,6 +1,6 @@
 {
-  "short_name": "Tv műsor",
-  "name": "Tv műsor",
+  "short_name": "TV Műsor",
+  "name": "TV Műsor",
   "icons": [
     {
       "src": "logo.png",
@@ -11,5 +11,5 @@
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#43a047",
-  "background_color": "#ffffff"
+  "background_color": "#76d275"
 }

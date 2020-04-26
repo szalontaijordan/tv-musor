@@ -2,44 +2,11 @@
   box-sizing: border-box;
 }
 
-.container {
-  max-width: 450px;
-  margin: 0 auto;
-}
-
-.container > nav {
-  position: sticky;
-  top: 0;
-}
-
 ul {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-}
-
-.container nav ul li button {
-  padding: 16px;
-  min-width: 80px;
-  height: 60px;
-  border: none;
-  outline: none;
-  background: none;
-  color: white;
-  background-color: #43a047;
-}
-
-.container nav ul li button.active {
-  pointer-events: none;
-  background-color: #00701a;
-}
-
-nav + ul {
-  width: 100%;
-  flex-direction: column;
-  text-align: left;
-  border: 1px solid #43a047;
 }
 
 .Item {
@@ -56,6 +23,7 @@ nav + ul {
 
 .Item.active {
   background-color: #76d275;
+  color: white;
 }
 
 .loading {

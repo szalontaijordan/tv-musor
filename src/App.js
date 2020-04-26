@@ -1,5 +1,7 @@
 import React from 'react';
 import './App.css';
+import './FullWidthTabs.js';
+import FullWidthTabs from './FullWidthTabs.js';
 
 export default function App() {
   const [data, setData] = React.useState({});
@@ -16,24 +18,33 @@ export default function App() {
     fetchData();
   }, []);
 
-  React.useEffect(() => {
-    const x = document.querySelector('.Item.active');
-    x && x.scrollIntoView(true);
-    
-    const container = document.querySelector('html');
-    container.scrollTop -= 60;
-  }, [tab]);
-
   if (!data.response) {
     return <SplashScreen />;
   }
 
   const empty = { items: [] };
-  const tv = (data.response.find(item => item.channel.label === tab) || empty)
-    .items
+  const tv = (data.response || []).map(x => {
+    const tmp = x.items
     .sort((a, b) => compareDates(new Date(a.startDate), new Date(b.startDate)))
     .filter(a => isDateActual(new Date(a.startDate)));
 
+    return tmp
+      .map((item, i) => {
+        const isActive = isDateActive(item, tmp[i + 1]);
+        return <Item key={i} item={item} isActive={isActive} />
+      });
+  });
+    /*
+  const items = tv
+    .map((item, i) => {
+      const isActive = isDateActive(item, tv[i + 1]);
+      return <Item key={i} item={item} isActive={isActive} />
+    });
+*/
+  const tabs = (data.response || []).map(item => item.channel.label);
+
+  return <FullWidthTabs items={tv} tabs={tabs} />;
+/*
   return (
     <div className="container">
       <nav>
@@ -55,7 +66,7 @@ export default function App() {
           })}
       </ul>
     </div>
-  );
+  );*/
 }
 
 function Item({ item, isActive }) {
