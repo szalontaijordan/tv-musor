@@ -1,21 +1,31 @@
 {
-  "name": "react-express-starter",
-  "version": "0.1.0",
-  "private": true,
+  "name": "tv-musor",
+  "version": "1.0.0",
   "dependencies": {
+    "microdata-node": "^1.0.0",
+    "node-fetch": "^2.6.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
-    "react-scripts": "^3.4.0"
+    "react-scripts": "^3.4.0",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "express-pino-logger": "^4.0.0",
+    "node-env-run": "^3.0.2",
+    "nodemon": "^1.19.3",
+    "npm-run-all": "^4.1.5",
+    "pino-colada": "^1.4.5"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "react-start": "react-scripts start",
+    "start": "node server/index.js",
     "build": "react-scripts build",
+    "build-prd": "react-scripts build && mv build ./server",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "server": "node-env-run server --exec nodemon | pino-colada",
-    "dev": "run-p server start"
+    "dev": "run-p server start",
+    "postinstall": "npm run build-prd"
   },
-  "proxy": "http://localhost:3001",
   "eslintConfig": {
     "extends": "react-app"
   },
@@ -24,14 +34,5 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ],
-  "devDependencies": {
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1",
-    "express-pino-logger": "^4.0.0",
-    "node-env-run": "^3.0.2",
-    "nodemon": "^1.19.3",
-    "npm-run-all": "^4.1.5",
-    "pino-colada": "^1.4.5"
-  }
+  ]
 }
