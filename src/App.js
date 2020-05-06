@@ -92,7 +92,7 @@ export function BottomAppBar({ shoppingList: { isComplete, list }, ...props }) {
           </IconButton>
           { selected.id !== identity.id && <Fab color="secondary" aria-label="add" className={classes.fabButton}>
             {isComplete
-              ? <Share list={list} />
+              ? <Share list={list} from={selected.id} />
               : location.pathname === selected.fabIcon.props.to
                 ? selected.fabIcon
                 : navIcon(selected.fabIcon)}
@@ -135,9 +135,15 @@ export function BottomAppBar({ shoppingList: { isComplete, list }, ...props }) {
   );
 }
 
-function Share({ list }) {
+function Share({ list, from }) {
   const classes = useStyles();
-  return <ShareIcon className={classes.white} onClick={e => console.log(list)} />;
+  const history = useHistory();
+  const onClick = e => {
+    console.log(list);
+    history.push(from);
+  }
+
+  return <ShareIcon className={classes.white} onClick={onClick} />;
 }
 
 function navIcon(icon) {
