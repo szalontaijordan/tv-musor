@@ -1,113 +1,123 @@
 import React from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import Paper from '@material-ui/core/Paper';
+import Fab from '@material-ui/core/Fab';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import Avatar from '@material-ui/core/Avatar';
+import MenuIcon from '@material-ui/icons/Menu';
+import AddIcon from '@material-ui/icons/Add';
+import SearchIcon from '@material-ui/icons/Search';
+import MoreIcon from '@material-ui/icons/MoreVert';
+import CreateIcon from '@material-ui/icons/Create';
+import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
+import PermIdentityIcon from '@material-ui/icons/PermIdentity';
+
 import './App.css';
-import './FullWidthTabs.js';
-import FullWidthTabs from './FullWidthTabs.js';
+import { SwipeableDrawer, Divider, ThemeProvider } from '@material-ui/core';
+import { customTheme } from './customTheme';
+
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  Redirect,
+  NavLink
+} from 'react-router-dom';
+import { useStyles } from './styles';
+import CheckboxList from './CheckboxList';
 
 export default function App() {
-  const [data, setData] = React.useState({});
-  const [tab, setTab] = React.useState('');
+  const title = '';
+  const router = <Switch>
+    <Route path="/" exact><Redirect to={{ pathname: 'shop' }} /></Route>
+    <Route path="/shop" exact><Shop /></Route>
+    <Route path="/create" exact><Write /></Route>
+    <Route path="/identity" exact><Identity /></Route>
+  </Switch>;
 
-  React.useEffect(() => {
-    async function fetchData() {
-      const response = await fetch('/api');
-      const json = await response.json();
-      setData(json);
-      setTab(json.response[0].channel.label);
-    }
-
-    fetchData();
-  }, []);
-
-  if (!data.response) {
-    return <SplashScreen />;
-  }
-
-  const empty = { items: [] };
-  const tv = (data.response || []).map(x => {
-    const tmp = x.items
-    .sort((a, b) => compareDates(new Date(a.startDate), new Date(b.startDate)))
-    .filter(a => isDateActual(new Date(a.startDate)));
-
-    return tmp
-      .map((item, i) => {
-        const isActive = isDateActive(item, tmp[i + 1]);
-        return <Item key={i} item={item} isActive={isActive} />
-      });
-  });
-    /*
-  const items = tv
-    .map((item, i) => {
-      const isActive = isDateActive(item, tv[i + 1]);
-      return <Item key={i} item={item} isActive={isActive} />
-    });
-*/
-  const tabs = (data.response || []).map(item => item.channel.label);
-
-  return <FullWidthTabs items={tv} tabs={tabs} />;
-/*
-  return (
-    <div className="container">
-      <nav>
-        <ul>
-          { data.response.map(x => x.channel).map((channel, i) => {
-            return <li key={i}>
-              <button
-                className={tab === channel.label ? 'active' : ''}
-                onClick={setTab.bind(null, channel.label)}>{channel.label}</button>
-            </li>
-          })}
-        </ul>
-      </nav>
-      <ul>
-        {tv
-          .map((item, i) => {
-            const isActive = isDateActive(item, tv[i + 1]);
-            return <Item key={i} item={item} isActive={isActive} />
-          })}
-      </ul>
-    </div>
-  );*/
+  return <Router><BottomAppBar title={title} children={router} /></Router>;
 }
 
-function Item({ item, isActive }) {
-  const classList = ['Item', isActive ? 'active' : ''];
+export function Shop() {
+  return <CheckboxList />;
+}
+
+export function Write() {
+  return 'Write';
+}
+
+export function Identity() {
+  return 'Identity';
+}
+
+export function BottomAppBar({ title, ...props }) {
+  const classes = useStyles();
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  
+  const actions = [
+    { label: 'Lista írás', id: 'create', menuIcon: <CreateIcon />, fabIcon: <CreateIcon className={classes.white} /> },
+    { label: 'Bevásárlás', id: 'shop', menuIcon: <ShoppingBasketIcon />, fabIcon: <ShoppingBasketIcon className={classes.white} /> }
+  ];
+  const identity = { label: 'Azonosító', id: 'identity', menuIcon: <PermIdentityIcon />, fabIcon: <PermIdentityIcon className={classes.white} /> };
+
+  const [selected, setSelected] = React.useState(actions[0]);
+
   return (
-    <div className={classList.join(' ')}>
-      <div className="date">{new Date(item.startDate).toLocaleString('hu-HU', { hour: 'numeric', minute: 'numeric', hour12: false })}</div>
-      <div className="name">{item.name}</div>
-    </div>
+    <ThemeProvider theme={customTheme}>
+      <CssBaseline />
+      <Paper square className={classes.paper}>
+        {props.children}
+      </Paper>
+      <AppBar position="fixed" color="primary" className={classes.appBar}>
+        <Toolbar>
+          <IconButton onClick={() => setIsDrawerOpen(true)} edge="start" color="inherit" aria-label="open drawer">
+            <MenuIcon className={classes.white} />
+          </IconButton>
+          { selected.id !== identity.id && <Fab color="secondary" aria-label="add" className={classes.fabButton}>
+            {selected.fabIcon}
+          </Fab> }
+          <div className={classes.grow} />
+        </Toolbar>
+      </AppBar>
+      <SwipeableDrawer
+          anchor="bottom"
+          open={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          onOpen={() => setIsDrawerOpen(true)}
+        >
+        <div className={classes.fullList} onClick={() => setIsDrawerOpen(false)}>
+          <List className={classes.block}>
+            {actions.map((action, index) => (
+              <NavLink to={action.id} className={classes.resetLink} >
+              <ListItem onClick={() => setSelected(action)} key={action.id}>
+                <ListItemIcon>{action.menuIcon}</ListItemIcon>
+                <ListItemText primary={action.label} />
+              </ListItem>
+              </NavLink>
+            ))}
+          </List>
+          <Divider />
+          <List className={classes.block}>
+            <NavLink to={identity.id} className={classes.resetLink} >
+              <ListItem button onClick={() => setSelected(identity)} key="1">
+                <ListItemIcon>{identity.menuIcon}</ListItemIcon>
+                <ListItemText primary={identity.label} />
+              </ListItem>
+            </NavLink>
+          </List>
+        </div>
+      </SwipeableDrawer>
+    </ThemeProvider>
   );
 }
-
-function SplashScreen() {
-  return <div className="Splashscreen container">
-    <div className="loading">
-      <div>Egy pillanat ...</div>
-      <div className="lds-ripple"><div></div><div></div></div>
-    </div>
-  </div>;
-}
-
-function compareDates(d1, d2) {
-  return d1.getTime() - d2.getTime();
-}
-
-function isDateActual(d) {
-  const now = new Date();
-  now.setHours(now.getHours() - 3);
-
-  return d.getTime() > now.getTime();
-}
-
-function isDateActive(x, y) {
-  if (!x || !y) {
-    return false;
-  }
-
-  const d1 = new Date(x.startDate).getTime();
-  const d2 = new Date(y.startDate).getTime();
-  const now = new Date().getTime();
-
-  return d1 <= now && now < d2;
-}
-
