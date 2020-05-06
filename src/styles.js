@@ -46,6 +46,9 @@ export const useStyles = makeStyles((theme) => ({
         color: theme.palette.text.primary,
         background: 'transparent',  
       }
+    },
+    heightFix: {
+      height: '24px'
     }
   }));
 

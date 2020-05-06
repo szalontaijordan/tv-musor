@@ -21,6 +21,8 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import CreateIcon from '@material-ui/icons/Create';
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
+import ShareIcon from '@material-ui/icons/Share';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import './App.css';
 import { SwipeableDrawer, Divider, ThemeProvider } from '@material-ui/core';
@@ -38,36 +40,40 @@ import { useStyles } from './styles';
 import CheckboxList from './CheckboxList';
 
 export default function App() {
-  const title = '';
+  const [shoppingList, setShoppingList] = React.useState({});
+  const onComplete = (x) => setShoppingList(x);
+
   const router = <Switch>
-    <Route path="/" exact><Redirect to={{ pathname: 'shop' }} /></Route>
-    <Route path="/shop" exact><Shop /></Route>
-    <Route path="/create" exact><Write /></Route>
-    <Route path="/identity" exact><Identity /></Route>
+    <Route path="/" exact strict><Redirect to={{ pathname: 'shop' }} /></Route>
+    <Route path="/shop" exact strict><Shop /></Route>
+    <Route path="/create" exact strict><Create onComplete={onComplete} /></Route>
+    <Route path="/create/new" exact strict><CheckboxList onComplete={onComplete} /></Route>
+    <Route path="/identity" exact strict><Identity /></Route>
   </Switch>;
 
-  return <Router><BottomAppBar title={title} children={router} /></Router>;
+  return <Router><BottomAppBar children={router} shoppingList={shoppingList} /></Router>;
 }
 
-export function Shop() {
-  return <CheckboxList />;
+export function Shop({ onComplete }) {
+  return 'Shop';
 }
 
-export function Write() {
-  return 'Write';
+export function Create({ onComplete }) {
+  return 'Create';
 }
 
 export function Identity() {
   return 'Identity';
 }
 
-export function BottomAppBar({ title, ...props }) {
+export function BottomAppBar({ shoppingList: { isComplete, list }, ...props }) {
   const classes = useStyles();
+  const location = useLocation();
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   
   const actions = [
-    { label: 'Lista írás', id: 'create', menuIcon: <CreateIcon />, fabIcon: <CreateIcon className={classes.white} /> },
-    { label: 'Bevásárlás', id: 'shop', menuIcon: <ShoppingBasketIcon />, fabIcon: <ShoppingBasketIcon className={classes.white} /> }
+    { label: 'Lista írás', id: '/create', menuIcon: <CreateIcon />, fabIcon: <CreateIcon to="/create/new" className={classes.white} /> },
+    { label: 'Bevásárlás', id: '/shop', menuIcon: <ShoppingBasketIcon />, fabIcon: <ShoppingBasketIcon className={classes.white} /> }
   ];
   const identity = { label: 'Azonosító', id: 'identity', menuIcon: <PermIdentityIcon />, fabIcon: <PermIdentityIcon className={classes.white} /> };
 
@@ -85,9 +91,16 @@ export function BottomAppBar({ title, ...props }) {
             <MenuIcon className={classes.white} />
           </IconButton>
           { selected.id !== identity.id && <Fab color="secondary" aria-label="add" className={classes.fabButton}>
-            {selected.fabIcon}
+            {isComplete
+              ? <Share list={list} />
+              : location.pathname === selected.fabIcon.props.to
+                ? selected.fabIcon
+                : navIcon(selected.fabIcon)}
           </Fab> }
           <div className={classes.grow} />
+          <IconButton className={classes.white} edge="end" color="inherit">
+            <MoreIcon />
+          </IconButton>
         </Toolbar>
       </AppBar>
       <SwipeableDrawer
@@ -120,4 +133,15 @@ export function BottomAppBar({ title, ...props }) {
       </SwipeableDrawer>
     </ThemeProvider>
   );
+}
+
+function Share({ list }) {
+  const classes = useStyles();
+  return <ShareIcon className={classes.white} onClick={e => console.log(list)} />;
+}
+
+function navIcon(icon) {
+  const { to } = icon.props;
+
+  return <Link to={to} replace={false} style={{ height: '24px' }}>{icon}</Link>;
 }
