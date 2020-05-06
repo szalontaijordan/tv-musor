@@ -5,7 +5,6 @@ const pino = require('express-pino-logger')();
 const microdata = require('microdata-node');
 const fetch = require('node-fetch');
 
-// const PORT = process.env.PORT || '5000';
 const PORT = process.env.PORT || '3001';
 
 const app = express();
@@ -68,11 +67,12 @@ app.get('/api', async (req, res) => {
 });
 
 
-/*
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '/build/index.html'));
-});
-*/
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '/build/index.html'));
+  });  
+}
+
 app.listen(PORT, () => {
   console.log(`Express server is running on localhost:${PORT}`);
 });

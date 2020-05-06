@@ -22,9 +22,9 @@
   },
   "scripts": {
     "react-start": "react-scripts start",
-    "start": "node server/index.js",
+    "start": "env NODE_ENV=production && node server/index.js",
     "build": "react-scripts build",
-    "build-prd": "react-scripts build && mv build ./server",
+    "build-prd": "rm -rf ./server/build && react-scripts build && mv build ./server",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "server": "node-env-run server --exec nodemon | pino-colada",
