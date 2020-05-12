@@ -8,21 +8,19 @@ import Checkbox from '@material-ui/core/Checkbox';
 import DoneAllIcon from '@material-ui/icons/DoneAll';
 import ShareIcon from '@material-ui/icons/Share';
 import { InputBase, Slide, Fab, Zoom, Backdrop, CircularProgress } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { listService } from '../services/services';
 import Back from './Back';
+import { createNewId } from '../services/id';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     backgroundColor: theme.palette.background.paper,
   },
-  list: {
-    position: 'relative'
-  },
   fab: {
     color: 'white',
-    position: 'absolute',
+    position: 'fixed',
     bottom: theme.spacing(2),
     right: theme.spacing(2)
   },
@@ -37,33 +35,51 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: '700',
     width: '100vw'
   },
-  back: {
-  },
   backdrop: {
     zIndex: theme.zIndex.drawer + 1,
     color: '#fff',
   },
   meta: {
-    position: 'absolute',
-    right: theme.spacing(1),
-    bottom: theme.spacing(1)
+    textAlign: 'left',
+    padding: theme.spacing(2),
+    color: '#e0e0e0'
   }
 }));
 
-let id = 1;
+let ID = 1;
 
-export default function CheckboxList({ onComplete, initialList, initialTitle, immutable, id, date, ...props }) {
+const defaultSource = {
+  id: 'new',
+  list: [{ id: 0, label: '' }],
+  date: new Date(),
+  title: ''
+};
+
+export default function CheckboxList({ immutable, source = defaultSource, ...props }) {
+  const { id, date } = source;
+
+  const { id: listId } = useParams();
   const classes = useStyles();
   const history = useHistory();
   const [checked, setChecked] = React.useState([]);
   const [forceFocus, setForceFocus] = React.useState(-1);
   const [isLookingComplete, setIsLookingComplete] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [initialLoad, setInitialLoad] = React.useState(false);
 
-  const [title, setTitle] = React.useState(initialTitle || '');
-  const [list, setList] = React.useState(initialList || [{ id: 0, label: '' }]);
+  const [shoppingList, setShoppingList] = React.useState(source);
 
   const placeholder = `Bevásárlás - ${new Date().toLocaleString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+
+  React.useEffect(() => {
+    if (listId && listId !== 'new') {
+      setInitialLoad(true);
+      listService.fetchList(id).then(shoppingList => {
+        setShoppingList(shoppingList);
+        setInitialLoad(false);
+      });
+    }
+  }, []);
 
   React.useEffect(() => {
     const shouldFocus = document.querySelector(`#checkbox-list-label-${forceFocus}`);
@@ -75,25 +91,28 @@ export default function CheckboxList({ onComplete, initialList, initialTitle, im
   }, [forceFocus]);
 
   React.useEffect(() => {
-    const complete = list.some(x => x.label.length > 0);
+    const complete = shoppingList.list.some(x => x.label.length > 0);
     setIsLookingComplete(complete);
-  }, [list]);
+  }, [shoppingList]);
 
   React.useEffect(() => {
     if (isLoading) {
-      const title = title || placeholder;
+      const listEntity = {
+        ...shoppingList,
+        list: shoppingList.list.filter(x => !!x.label),
+        title: shoppingList.title || placeholder,
+        id: shoppingList.id === 'new' ? createNewId() : shoppingList.id,
+        date: new Date().toJSON()
+      };
 
-      listService.createList({ list, title, id: new Date().getTime(), date: new Date().toJSON() }).then(() => {
-        onComplete({ isComplete: true, list, title });
+      listService.createList(listEntity).then(() => {
         setIsLoading(false);
         history.push('/');
       });
     }
   }, [isLoading]);
 
-  const completeList = () => {
-    setIsLoading(true);
-  };
+  const completeList = () => setIsLoading(true);
 
   const handleToggle = (value) => () => {
     const currentIndex = checked.indexOf(value);
@@ -109,16 +128,18 @@ export default function CheckboxList({ onComplete, initialList, initialTitle, im
   };
 
   const onKeyDown = (e, value) => {
+    const { list } = shoppingList;
+
     if (e.key === 'Enter') {
       const indexOfItem = list.findIndex(x => x.id === value.id);
       const newList = [...list];
       const newItem = {
-        id: id++,
+        id: ID++,
         label: ''
       };
 
       newList.splice(indexOfItem + 1, 0, newItem);
-      setList(newList);
+      setShoppingList({ ...shoppingList, list: newList });
       setForceFocus(newItem.id);
     } else if (e.key === 'Backspace' && e.target.value === '') {
       const deletedItemIndex = list.findIndex(x => x.id === value.id);
@@ -126,7 +147,7 @@ export default function CheckboxList({ onComplete, initialList, initialTitle, im
       const newList = list.filter(x => x.id !== value.id);
 
       if (newList.length !== 0) {
-        setList(newList);
+        setShoppingList({ ...shoppingList, list: newList });
         setForceFocus(prevItem ? prevItem.id : -1);
       }
     } else if (e.key === 'ArrowUp') {
@@ -141,7 +162,7 @@ export default function CheckboxList({ onComplete, initialList, initialTitle, im
   };
 
   const onChange = (e, value) => {
-    const newList = list.map(x => {
+    const newList = shoppingList.list.map(x => {
       if (x.id === value.id) {
         return {
           ...x,
@@ -150,24 +171,23 @@ export default function CheckboxList({ onComplete, initialList, initialTitle, im
       }
       return x;
     })
-    setList(newList);
-  }
-  const onTitleChange = e => {
-    setTitle(e.target.value);
+    setShoppingList({ ...shoppingList, list: newList });
   }
 
+  const onTitleChange = e => setShoppingList({ ...shoppingList, title: e.target.value });
+
   return <Slide direction={props.direction || 'up'} in mountOnEnter unmountOnExit>
-    <div className={classes.list}>
+    <div style={{ height: '100vh' }}>
       <Back />
       <InputBase
         className={classes.listTitle}
         placeholder={placeholder}
-        value={title}
+        value={shoppingList.title}
         style={{ pointerEvents: immutable ? 'none' : 'inherit' }}
         onChange={onTitleChange}
       ></InputBase>
       <List className={classes.root}>
-        {list.map((value, index) => {
+        {shoppingList.list.map((value, index) => {
           const labelId = `checkbox-list-label-${value.id}`;
 
           return (
@@ -196,22 +216,22 @@ export default function CheckboxList({ onComplete, initialList, initialTitle, im
         })}
         { isLookingComplete
           && <ListItem role={undefined} dense button className={classes.marginTop}>
-              <ListItemIcon><DoneAllIcon color={checked.length === list.length ? 'secondary' : 'inherit' } /></ListItemIcon>
+              <ListItemIcon><DoneAllIcon color={checked.length === shoppingList.length ? 'secondary' : 'inherit' } /></ListItemIcon>
               <ListItemText primary="Ennyu" />
           </ListItem> }
+          <div className={classes.meta}>
+            <div>{id === 'new' || !id || ''}</div>
+            <div>{ date ? new Date(date).toLocaleString('hu-HU') : '' }</div>
+          </div>    
       </List>
-      <div className={classes.meta}>
-        <div>{id || ''}</div>
-        <div>{ date ? new Date(date).toLocaleString('hu-HU') : '' }</div>
-      </div>
       <Zoom in={!immutable && isLookingComplete}>
         <Fab onClick={completeList} color="secondary" aria-label="share" className={classes.fab}>
           <ShareIcon />
         </Fab>
       </Zoom>
-      { isLoading && <Backdrop className={classes.backdrop} open>
+      <Backdrop className={classes.backdrop} open={isLoading || initialLoad}>
         <CircularProgress color="inherit" />
-      </Backdrop> }
+      </Backdrop>
     </div>
   </Slide>;
 }

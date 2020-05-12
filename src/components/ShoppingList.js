@@ -10,19 +10,23 @@ import ShareIcon from '@material-ui/icons/Share';
 import { ListItemSecondaryAction } from '@material-ui/core';
 
 import { useStyles } from '../styles';
-import SimpleMenu from './SimpleMenu';
+import { useHistory } from 'react-router-dom';
 
-export default function ShoppingLists({ lists }) {
+export default function ShoppingLists({ lists, destination = 'create' }) {
     const classes = useStyles();
+    const history = useHistory();
     const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const onClick = ({ id }) => history.push(`/${destination}/${id}`);
 
     return <List>
         {(lists || []).map((list, index) => {
             const { title, list: items, date } = list;
 
-            return <ListItem button key={index} alignItems="flex-start">
+            return <ListItem onClick={() => onClick(list)} button key={index} alignItems="flex-start">
                 <ListItemText
                     primary={title}
+                    style={{ maxWidth: '50vw' }}
                     secondary={
                         <React.Fragment>
                             <Typography
@@ -31,7 +35,7 @@ export default function ShoppingLists({ lists }) {
                                 className={classes.inline}
                                 color="textPrimary"
                             >{date ? new Date(date).toLocaleString('hu-HU') + ' - ' : '- '}</Typography>
-                            {(items || []).map(item => item.label).join(', ')}
+                            {(items || []).slice(0, 4).map(item => item.label).join(', ') + ' ...'}
                         </React.Fragment>
                     }
                 />
@@ -39,7 +43,7 @@ export default function ShoppingLists({ lists }) {
                     <IconButton aria-label="share">
                         <ShareIcon />
                     </IconButton>
-                    <SimpleMenu items={['Törlés']} />
+                    { /* <SimpleMenu items={['Törlés']} /> */}
                 </ListItemSecondaryAction>
             </ListItem>
         })}

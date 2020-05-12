@@ -11,12 +11,12 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import Zoom from '@material-ui/core/Zoom';
 import { useLocation } from 'react-router-dom';
 
-import './App.css';
 import { ThemeProvider } from '@material-ui/core';
 import { customTheme } from '../customTheme';
 
 import { Link } from 'react-router-dom';
 import { useStyles } from '../styles';
+import SimpleMenu from './SimpleMenu';
 
 export default function BottomAppBar({ selected, navigation, ...props }) {
     const classes = useStyles();
@@ -29,7 +29,7 @@ export default function BottomAppBar({ selected, navigation, ...props }) {
                 {props.children}
             </Paper>
             {selected
-                && <AppBar position="fixed" color="primary" className={classes.appBar}>
+                && <AppBar position="fixed" color="primary" className={classes.appBar} style={{ top: 'auto' }} >
                     <Toolbar>
                         <IconButton onClick={() => props.setIsDrawerOpen(true)} edge="start" color="inherit" aria-label="open drawer">
                             <MenuIcon className={classes.white} />
@@ -43,9 +43,7 @@ export default function BottomAppBar({ selected, navigation, ...props }) {
                                 </Link>
                             </Zoom>}
                         <div className={classes.grow} />
-                        <IconButton className={classes.white} edge="end" color="inherit">
-                            <MoreIcon />
-                        </IconButton>
+                        <SimpleMenu style={{ color: 'white' }} items={['Legyen alapértelmezett']} />
                     </Toolbar>
                 </AppBar>}
             {navigation}

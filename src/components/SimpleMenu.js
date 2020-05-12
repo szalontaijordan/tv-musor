@@ -4,7 +4,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import { IconButton } from '@material-ui/core';
 
-export default function SimpleMenu({ items }) {
+export default function SimpleMenu({ items, style }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const handleClick = (event) => {
@@ -16,7 +16,7 @@ export default function SimpleMenu({ items }) {
     };
 
     return <React.Fragment>
-        <IconButton onClick={handleClick} aria-label="more" aria-haspopup="true" aria-controls="simple-menu">
+        <IconButton style={style} onClick={handleClick} aria-label="more" aria-haspopup="true" aria-controls="simple-menu">
             <MoreIcon />
         </IconButton>
         <Menu

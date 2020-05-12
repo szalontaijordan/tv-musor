@@ -22,6 +22,7 @@ export default function ListGetter({ ...props }) {
     React.useEffect(() => {
         if (loading) {
             listService.fetchList(value).then(list => {
+                listService.createActiveShopping(list);
                 setLoading(false);
                 console.log(list);
                 history.push('/shop/do/' + list.id);
@@ -46,8 +47,8 @@ export default function ListGetter({ ...props }) {
                     component="div"
                     color="textPrimary"
                     >Add meg a bevásárló lista azonosítóját!</Typography>
-                <TextField value={value} onChange={onChange} id="outlined-basic" className={classes.list} autoComplete="off" label="Lista azonosító" variant="outlined" />
-                <Button onClick={onClick} className={classes.white} style={{ position: 'relative' }} variant="contained" color="primary">
+                <TextField value={value} onChange={onChange} id="outlined-basic" style={{ marginBottom: '16px' }} autoComplete="off" label="Lista azonosító" variant="outlined" />
+                <Button onClick={onClick} style={{ position: 'relative', color: 'white' }} variant="contained" color="primary">
                     Vásárlás 
                 </Button>
             </div>

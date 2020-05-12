@@ -17,12 +17,6 @@ export default function ActiveList({ ...props }) {
 
     return <React.Fragment>
         <Backdrop className={classes.backdrop} open={!list}><CircularProgress color="inherit" /></Backdrop>
-        {list && <CheckboxList
-            initialTitle={list.title}
-            initialList={list.list}
-            id={list.id}
-            date={list.date}
-            immutable
-            onComplete={x => console.log(x)} />}
+        {list && <CheckboxList source={list} immutable onComplete={x => console.log(x)} />}
     </React.Fragment>;
 }

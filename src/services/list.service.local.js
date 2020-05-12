@@ -13,11 +13,27 @@ const mockList = {
     date: new Date()
 };
 
+const mockActive = {
+    id: 'mock-id',
+    date: new Date(),
+    title: 'Test list',
+    list: [
+        { id: 0, label: 'Test 1'},
+        { id: 1, label: 'Test 2'},
+        { id: 2, label: 'Test 3'},
+        { id: 3, label: 'Test 4'},
+    ]
+};
+
 export class ListServiceLocal extends ListService {
 
     lists = [
-        mockList
+        // mockList
     ];
+
+    activeShoppings = [
+        // mockActive
+    ]
 
     constructor(...props) {
         super(props);
@@ -36,13 +52,32 @@ export class ListServiceLocal extends ListService {
     async createList(list) {
         console.log('[SERVICE] Create', list);
         await this._delay();
-        this.lists.push(list);
+        const index = this.lists.find(x => x.id === list.id);
+        if (index >= 0) {
+            this.lists.splice(index, 0);
+        }
+        this.lists.unshift(list);
         return list;
     }
 
     async deleteList(list) {
         await this._delay();
         return this.lists.filter(x => x.id !== list.id);
+    }
+
+    async fetchActiveShoppings() {
+        await this._delay();
+        return this.activeShoppings;
+    }
+
+    async createActiveShopping(list) {
+        await this._delay();
+        const index = this.activeShoppings.find(x => x.id === list.id);
+        if (index >= 0) {
+            this.activeShoppings.splice(index, 0);
+        }
+        this.activeShoppings.unshift(list);
+        return list;
     }
 
     _delay() {

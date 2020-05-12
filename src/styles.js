@@ -69,6 +69,14 @@ export const useStyles = makeStyles((theme) => ({
     },
     heightFix: {
       height: '24px'
+    },
+    imageCenter: {
+      width: '350px',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      opacity: '0.5'
     }
   }));
 

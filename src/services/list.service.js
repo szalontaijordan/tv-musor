@@ -18,4 +18,12 @@ export class ListService {
     async deleteList(list) {
         throw new Error('Not implemented');
     }
+
+    async fetchActiveShoppings() {
+        throw new Error('Not implemented');
+    }
+
+    async createActiveShopping() {
+        throw new Error('Not implemented');
+    }
 }

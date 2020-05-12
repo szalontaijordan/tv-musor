@@ -5,6 +5,8 @@ import { listService } from '../services/services';
 import Header from './Header';
 import ShoppingLists from './ShoppingList';
 
+import image from '../assets/create.svg';
+
 export default function Create() {
     const classes = useStyles();
     const [lists, setLists] = React.useState(undefined);
@@ -15,12 +17,14 @@ export default function Create() {
     }, []);
 
     if (Array.isArray(lists) && lists.length === 0) {
-        return 'Itt lesznek a listák';
+        return <React.Fragment>
+            <Header title="Lista írás" />
+            <img src={image} className={classes.imageCenter} />
+        </React.Fragment>;
     }
 
     return <React.Fragment>
-        {!Array.isArray(lists)
-            && <Backdrop className={classes.backdrop} open><CircularProgress color="inherit" /></Backdrop>}
+        <Backdrop className={classes.backdrop} open={!Array.isArray(lists)}><CircularProgress color="inherit" /></Backdrop>
         <Header title="Lista írás" />
         <ShoppingLists lists={lists} />
     </React.Fragment>;
