@@ -22,10 +22,11 @@ import CreateIcon from '@material-ui/icons/Create';
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import ShareIcon from '@material-ui/icons/Share';
+import Zoom from '@material-ui/core/Zoom';
 import { useHistory, useLocation } from 'react-router-dom';
 
 import './App.css';
-import { SwipeableDrawer, Divider, ThemeProvider } from '@material-ui/core';
+import { SwipeableDrawer, Divider, ThemeProvider, ListItemSecondaryAction } from '@material-ui/core';
 import { customTheme } from './customTheme';
 
 import {
@@ -40,7 +41,24 @@ import { useStyles } from './styles';
 import CheckboxList from './CheckboxList';
 
 export default function App() {
+  const classes = useStyles();
+
+  const actions = [
+    { label: 'Lista írás', id: '/create', menuIcon: <CreateIcon />, fabIcon: <CreateIcon to="/create/new" className={classes.white} /> },
+    { label: 'Bevásárlás', id: '/shop', menuIcon: <ShoppingBasketIcon />, fabIcon: <ShoppingBasketIcon className={classes.white} /> }
+  ];
+  const identity = { label: 'Azonosító', id: '/identity', menuIcon: <PermIdentityIcon />, fabIcon: null };
+
+  const [selected, setSelected] = React.useState(null);
   const [shoppingList, setShoppingList] = React.useState({});
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if ('list' in shoppingList) {
+      console.log('SHOPPING LIST CHANGE:', shoppingList);
+    }
+  }, [shoppingList]);
+
   const onComplete = (x) => setShoppingList(x);
 
   const router = <Switch>
@@ -51,33 +69,40 @@ export default function App() {
     <Route path="/identity" exact strict><Identity /></Route>
   </Switch>;
 
-  return <Router><BottomAppBar children={router} shoppingList={shoppingList} /></Router>;
+  const navigation = <Navigation
+    isDrawerOpen={isDrawerOpen}
+    setIsDrawerOpen={setIsDrawerOpen}
+    setSelected={setSelected}
+    actions={actions}
+    identity={identity} />;
+
+  return <Router>
+    <BottomAppBar
+      children={router}
+      navigation={navigation}
+      setIsDrawerOpen={setIsDrawerOpen}
+      selected={selected} />
+  </Router>;
 }
 
 export function Shop({ onComplete }) {
-  return 'Shop';
+  return 'Bevásárlás';
 }
 
 export function Create({ onComplete }) {
-  return 'Create';
+  React.useEffect(() => {
+    console.log('Lista írás');
+  }, []);
+  return 'Lista írás';
 }
 
 export function Identity() {
-  return 'Identity';
+  return 'Azonosító';
 }
 
-export function BottomAppBar({ shoppingList: { isComplete, list }, ...props }) {
+export function BottomAppBar({ selected, navigation, ...props }) {
   const classes = useStyles();
   const location = useLocation();
-  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
-  
-  const actions = [
-    { label: 'Lista írás', id: '/create', menuIcon: <CreateIcon />, fabIcon: <CreateIcon to="/create/new" className={classes.white} /> },
-    { label: 'Bevásárlás', id: '/shop', menuIcon: <ShoppingBasketIcon />, fabIcon: <ShoppingBasketIcon className={classes.white} /> }
-  ];
-  const identity = { label: 'Azonosító', id: 'identity', menuIcon: <PermIdentityIcon />, fabIcon: <PermIdentityIcon className={classes.white} /> };
-
-  const [selected, setSelected] = React.useState(actions[0]);
 
   return (
     <ThemeProvider theme={customTheme}>
@@ -85,54 +110,74 @@ export function BottomAppBar({ shoppingList: { isComplete, list }, ...props }) {
       <Paper square className={classes.paper}>
         {props.children}
       </Paper>
-      <AppBar position="fixed" color="primary" className={classes.appBar}>
-        <Toolbar>
-          <IconButton onClick={() => setIsDrawerOpen(true)} edge="start" color="inherit" aria-label="open drawer">
-            <MenuIcon className={classes.white} />
-          </IconButton>
-          { selected.id !== identity.id && <Fab color="secondary" aria-label="add" className={classes.fabButton}>
-            {isComplete
-              ? <Share list={list} from={selected.id} />
-              : location.pathname === selected.fabIcon.props.to
-                ? selected.fabIcon
-                : navIcon(selected.fabIcon)}
-          </Fab> }
-          <div className={classes.grow} />
-          <IconButton className={classes.white} edge="end" color="inherit">
-            <MoreIcon />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-      <SwipeableDrawer
-          anchor="bottom"
-          open={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          onOpen={() => setIsDrawerOpen(true)}
-        >
-        <div className={classes.fullList} onClick={() => setIsDrawerOpen(false)}>
-          <List className={classes.block}>
-            {actions.map((action, index) => (
-              <NavLink to={action.id} className={classes.resetLink} >
-              <ListItem onClick={() => setSelected(action)} key={action.id}>
-                <ListItemIcon>{action.menuIcon}</ListItemIcon>
-                <ListItemText primary={action.label} />
-              </ListItem>
-              </NavLink>
-            ))}
-          </List>
-          <Divider />
-          <List className={classes.block}>
-            <NavLink to={identity.id} className={classes.resetLink} >
-              <ListItem button onClick={() => setSelected(identity)} key="1">
-                <ListItemIcon>{identity.menuIcon}</ListItemIcon>
-                <ListItemText primary={identity.label} />
-              </ListItem>
-            </NavLink>
-          </List>
-        </div>
-      </SwipeableDrawer>
+       { selected
+         && <AppBar position="fixed" color="primary" className={classes.appBar}>
+            <Toolbar>
+              <IconButton onClick={() => props.setIsDrawerOpen(true)} edge="start" color="inherit" aria-label="open drawer">
+                <MenuIcon className={classes.white} />
+              </IconButton>
+              { selected.fabIcon
+                && <Zoom in={!!selected}>
+                <Fab color="secondary" aria-label="add" className={classes.fabButton}>
+                  {location.pathname === selected.fabIcon.props.to
+                    ? selected.fabIcon
+                    : navIcon(selected.fabIcon)}
+                </Fab>
+              </Zoom> }
+              <div className={classes.grow} />
+              <IconButton className={classes.white} edge="end" color="inherit">
+                <MoreIcon />
+              </IconButton>
+            </Toolbar>
+          </AppBar> }
+      { navigation }
     </ThemeProvider>
   );
+}
+
+function Navigation({ actions, identity, isDrawerOpen, ...props }) {
+  const classes = useStyles();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    let selected = actions.find(a => a.id === location.pathname);
+
+    if (!selected && location.pathname === identity.id) {
+      selected = identity;
+    }
+
+    console.log('SELECTED ACTION', selected)
+    props.setSelected(selected);
+  }, [location]);
+
+  return <SwipeableDrawer
+      anchor="bottom"
+      open={isDrawerOpen}
+      onClose={() => props.setIsDrawerOpen(false)}
+      onOpen={() => props.setIsDrawerOpen(true)}
+    >
+    <div className={classes.fullList} onClick={() => props.setIsDrawerOpen(false)}>
+      <List className={classes.block}>
+        {actions.map((action, index) => (
+          <NavLink key={index} to={action.id} className={classes.resetLink} >
+          <ListItem key={action.id}>
+            <ListItemIcon>{action.menuIcon}</ListItemIcon>
+            <ListItemText primary={action.label} />
+          </ListItem>
+          </NavLink>
+        ))}
+      </List>
+      <Divider />
+      <List className={classes.block}>
+        <NavLink to={identity.id} className={classes.resetLink} >
+          <ListItem button key="1">
+            <ListItemIcon>{identity.menuIcon}</ListItemIcon>
+            <ListItemText primary={identity.label} />
+          </ListItem>
+        </NavLink>
+      </List>
+    </div>
+  </SwipeableDrawer>;
 }
 
 function Share({ list, from }) {
