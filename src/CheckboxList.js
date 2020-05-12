@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
 
 let id = 1;
 
-export default function CheckboxList({ onComplete, initialList, ...props }) {
+export default function CheckboxList({ onComplete, initialList, initialTitle, immutable, ...props }) {
   const classes = useStyles();
   const history = useHistory();
   const [checked, setChecked] = React.useState([]);
@@ -55,7 +55,7 @@ export default function CheckboxList({ onComplete, initialList, ...props }) {
   const [isLookingComplete, setIsLookingComplete] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const [title, setTitle] = React.useState('');
+  const [title, setTitle] = React.useState(initialTitle || '');
   const [list, setList] = React.useState(initialList || [{ id: 0, label: '' }]);
 
   const placeholder = `Bevásárlás - ${new Date().toLocaleString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' })}`;
@@ -78,7 +78,7 @@ export default function CheckboxList({ onComplete, initialList, ...props }) {
     if (isLoading) {
       const title = title || placeholder;
 
-      listService.createList({ ...list, title, id: new Date().getTime() }).then(() => {
+      listService.createList({ list, title, id: new Date().getTime(), date: new Date().toJSON() }).then(() => {
         onComplete({ isComplete: true, list, title });
         setIsLoading(false);
         history.push('/');
@@ -161,6 +161,7 @@ export default function CheckboxList({ onComplete, initialList, ...props }) {
         className={classes.listTitle}
         placeholder={placeholder}
         value={title}
+        style={{ pointerEvents: immutable ? 'none' : 'inherit' }}
         onChange={onTitleChange}
       ></InputBase>
       <List className={classes.root}>

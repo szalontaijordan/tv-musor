@@ -1,8 +1,23 @@
 import { ListService } from "./list.service";
 
+const mockList = {
+    id: 'mock-id',
+    list: [
+        { id: 0, label: 'mock item 1'},
+        { id: 1, label: 'mock item 2'},
+        { id: 2, label: 'mock item 3'},
+        { id: 3, label: 'mock item 4'},
+        { id: 4, label: 'mock item 5'},
+    ],
+    title: 'Mock list 1',
+    date: new Date()
+};
+
 export class ListServiceLocal extends ListService {
 
-    lists = [];
+    lists = [
+        mockList
+    ];
 
     constructor(...props) {
         super(props);
@@ -15,7 +30,7 @@ export class ListServiceLocal extends ListService {
 
     async fetchList(id) {
         await this._delay();
-        return this.lists.find(x => x.id === id);
+        return mockList;
     }
 
     async createList(list) {

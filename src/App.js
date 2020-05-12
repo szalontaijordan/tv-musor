@@ -19,14 +19,15 @@ import AddIcon from '@material-ui/icons/Add';
 import SearchIcon from '@material-ui/icons/Search';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import CreateIcon from '@material-ui/icons/Create';
+import DeleteIcon from '@material-ui/icons/Delete';
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import ShareIcon from '@material-ui/icons/Share';
 import Zoom from '@material-ui/core/Zoom';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 
 import './App.css';
-import { SwipeableDrawer, Divider, ThemeProvider, ListItemSecondaryAction } from '@material-ui/core';
+import { SwipeableDrawer, Divider, ThemeProvider, ListItemSecondaryAction, Backdrop, CircularProgress } from '@material-ui/core';
 import { customTheme } from './customTheme';
 
 import {
@@ -39,13 +40,15 @@ import {
 } from 'react-router-dom';
 import { useStyles } from './styles';
 import CheckboxList from './CheckboxList';
+import { listService } from './services/services';
+import ListGetter from './ListGetter';
 
 export default function App() {
   const classes = useStyles();
 
   const actions = [
     { label: 'Lista írás', id: '/create', menuIcon: <CreateIcon />, fabIcon: <CreateIcon to="/create/new" className={classes.white} /> },
-    { label: 'Bevásárlás', id: '/shop', menuIcon: <ShoppingBasketIcon />, fabIcon: <ShoppingBasketIcon className={classes.white} /> }
+    { label: 'Bevásárlás', id: '/shop', menuIcon: <ShoppingBasketIcon />, fabIcon: <ShoppingBasketIcon to="/shop/new" className={classes.white} /> }
   ];
   const identity = { label: 'Azonosító', id: '/identity', menuIcon: <PermIdentityIcon />, fabIcon: null };
 
@@ -62,9 +65,11 @@ export default function App() {
   const onComplete = (x) => setShoppingList(x);
 
   const router = <Switch>
-    <Route path="/" exact strict><Redirect to={{ pathname: 'shop' }} /></Route>
+    <Route path="/" exact strict><Redirect to={{ pathname: '/create' }} /></Route>
     <Route path="/shop" exact strict><Shop /></Route>
-    <Route path="/create" exact strict><Create onComplete={onComplete} /></Route>
+    <Route path="/shop/new" exact strict><ListGetter /></Route>
+    <Route path="/shop/do/:id" exact strict><ActiveList /></Route>
+    <Route path="/create" exact strict><Create /></Route>
     <Route path="/create/new" exact strict><CheckboxList onComplete={onComplete} /></Route>
     <Route path="/identity" exact strict><Identity /></Route>
   </Switch>;
@@ -85,19 +90,96 @@ export default function App() {
   </Router>;
 }
 
-export function Shop({ onComplete }) {
-  return 'Bevásárlás';
+export function Header({ title }) {
+  const classes = useStyles();
+
+  return <React.Fragment>
+    <Typography
+      component="div"
+      className={classes.heading}
+      color="textPrimary"
+    >{title}</Typography>
+    <Divider />
+  </React.Fragment>
 }
 
-export function Create({ onComplete }) {
+export function Shop() {
+  return <React.Fragment>
+    <Header title="Bevásárlás" />
+    <ShoppingLists lists={[]} />
+  </React.Fragment>;
+}
+
+export function ActiveList({ ...props }) {
+  const { id } = useParams();
+  const classes = useStyles();
+  const [list, setList] = React.useState(null);
+
   React.useEffect(() => {
-    console.log('Lista írás');
+    listService.fetchList(id).then(list => setList(list));
   }, []);
-  return 'Lista írás';
+
+  return <React.Fragment>
+    <Backdrop className={classes.backdrop} open={!list}><CircularProgress color="inherit" /></Backdrop>
+    {list && <CheckboxList initialTitle={list.title} initialList={list.list} immutable onComplete={x => console.log(x)} />}
+  </React.Fragment>;
+}
+
+export function Create() {
+  const classes = useStyles();
+  const [lists, setLists] = React.useState(undefined);
+  const [remove, setRemove] = React.useState(undefined);
+
+  React.useEffect(() => {
+    listService.fetchLists().then(lists => setLists(lists));
+  }, []);
+
+  if (Array.isArray(lists) && lists.length === 0) {
+    return 'Itt lesznek a listák';
+  }
+
+  return <React.Fragment>
+    { !Array.isArray(lists)
+      && <Backdrop className={classes.backdrop} open><CircularProgress color="inherit" /></Backdrop> }
+    <Header title="Lista írás" />
+    <ShoppingLists lists={lists} />
+  </React.Fragment>;
+}
+
+export function ShoppingLists({ lists }) {
+  const classes = useStyles();
+
+  return <List>
+    {(lists || []).map((list, index) => {
+      const { title, list: items, date } = list;
+
+      return <ListItem button key={index} alignItems="flex-start">
+        <ListItemText
+          primary={title}
+          secondary={
+            <React.Fragment>
+              <Typography
+                component="span"
+                variant="body2"
+                className={classes.inline}
+                color="textPrimary"
+              >{ date ? new Date(date).toLocaleString('hu-HU') + ' - ' : '- ' }</Typography>
+              { (items || []).map(item => item.label).join(', ') }
+            </React.Fragment>
+          }
+        />
+        <ListItemSecondaryAction>
+          <IconButton edge="end" aria-label="delete">
+            <DeleteIcon />
+          </IconButton>
+        </ListItemSecondaryAction>
+      </ListItem>
+    })}
+  </List>;
 }
 
 export function Identity() {
-  return 'Azonosító';
+  return <Header title="Azonosító" />;
 }
 
 export function BottomAppBar({ selected, navigation, ...props }) {

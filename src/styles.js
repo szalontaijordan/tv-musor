@@ -14,6 +14,24 @@ export const useStyles = makeStyles((theme) => ({
     subheader: {
       backgroundColor: theme.palette.background.paper,
     },
+    center: {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      textAlign: 'center',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      transform: 'translate(-50%, -50%)'
+    },
+    heading: {
+      fontSize: '1.5em',
+      padding: theme.spacing(1, 2)
+    },
+    backdrop: {
+      zIndex: theme.zIndex.drawer + 1,
+      color: '#fff',
+    },
     appBar: {
       top: 'auto',
       bottom: 0,
