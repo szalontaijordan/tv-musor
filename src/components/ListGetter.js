@@ -1,10 +1,11 @@
 import React from 'react';
-import { useStyles } from "./styles";
+import { useStyles } from "../styles";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { Slide, IconButton, Divider, TextField, Button, Typography, CircularProgress, Backdrop } from '@material-ui/core';
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 import { useHistory, useLocation } from 'react-router-dom';
-import { listService } from './services/services';
+import { listService } from '../services/services';
+import Back from './Back';
 
 export default function ListGetter({ ...props }) {
     const classes = useStyles();
@@ -30,9 +31,7 @@ export default function ListGetter({ ...props }) {
 
     return <Slide direction={props.direction || 'left'} in mountOnEnter unmountOnExit>
         <div style={{ height: '100vh' }}>
-            <IconButton onClick={() => history.goBack()} className={classes.back}>
-                <ArrowBackIcon />
-            </IconButton>
+            <Back />
             <Divider />
             <div className={classes.center}>
                 <ShoppingBasketIcon fontSize="large" style={{ marginBottom: '16px' }} color="primary" />

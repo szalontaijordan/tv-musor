@@ -3,22 +3,22 @@ import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import Checkbox from '@material-ui/core/Checkbox';
-import IconButton from '@material-ui/core/IconButton';
-import CommentIcon from '@material-ui/icons/Comment';
 import DoneAllIcon from '@material-ui/icons/DoneAll';
 import ShareIcon from '@material-ui/icons/Share';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import { InputBase, Slide, Fab, Zoom, Divider, Snackbar, Backdrop, CircularProgress } from '@material-ui/core';
-import { useHistory, useLocation } from 'react-router-dom';
-import { listService } from './services/services';
+import { InputBase, Slide, Fab, Zoom, Backdrop, CircularProgress } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
+import { listService } from '../services/services';
+import Back from './Back';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     backgroundColor: theme.palette.background.paper,
+  },
+  list: {
+    position: 'relative'
   },
   fab: {
     color: 'white',
@@ -43,11 +43,16 @@ const useStyles = makeStyles((theme) => ({
     zIndex: theme.zIndex.drawer + 1,
     color: '#fff',
   },
+  meta: {
+    position: 'absolute',
+    right: theme.spacing(1),
+    bottom: theme.spacing(1)
+  }
 }));
 
 let id = 1;
 
-export default function CheckboxList({ onComplete, initialList, initialTitle, immutable, ...props }) {
+export default function CheckboxList({ onComplete, initialList, initialTitle, immutable, id, date, ...props }) {
   const classes = useStyles();
   const history = useHistory();
   const [checked, setChecked] = React.useState([]);
@@ -152,11 +157,8 @@ export default function CheckboxList({ onComplete, initialList, initialTitle, im
   }
 
   return <Slide direction={props.direction || 'up'} in mountOnEnter unmountOnExit>
-    <div>
-      <IconButton onClick={() => history.goBack()} className={classes.back}>
-        <ArrowBackIcon />
-      </IconButton>
-      <Divider />
+    <div className={classes.list}>
+      <Back />
       <InputBase
         className={classes.listTitle}
         placeholder={placeholder}
@@ -194,11 +196,15 @@ export default function CheckboxList({ onComplete, initialList, initialTitle, im
         })}
         { isLookingComplete
           && <ListItem role={undefined} dense button className={classes.marginTop}>
-              <ListItemIcon><DoneAllIcon /></ListItemIcon>
+              <ListItemIcon><DoneAllIcon color={checked.length === list.length ? 'secondary' : 'inherit' } /></ListItemIcon>
               <ListItemText primary="Ennyu" />
           </ListItem> }
       </List>
-      <Zoom in={isLookingComplete}>
+      <div className={classes.meta}>
+        <div>{id || ''}</div>
+        <div>{ date ? new Date(date).toLocaleString('hu-HU') : '' }</div>
+      </div>
+      <Zoom in={!immutable && isLookingComplete}>
         <Fab onClick={completeList} color="secondary" aria-label="share" className={classes.fab}>
           <ShareIcon />
         </Fab>

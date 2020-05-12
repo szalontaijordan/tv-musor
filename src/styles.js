@@ -46,6 +46,8 @@ export const useStyles = makeStyles((theme) => ({
       left: 0,
       right: 0,
       margin: '0 auto',
+      width: 56,
+      height: 56
     },
     fullList: {
       width: 'auto'
