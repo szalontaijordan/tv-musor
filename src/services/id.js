@@ -1,3 +1,6 @@
+// TODO: move node side
+const shortid = require('shortid');
+
 export function createNewId() {
-    return String(new Date().getTime());
+    return 'SL-' + shortid.generate();
 }

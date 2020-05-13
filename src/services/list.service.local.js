@@ -46,16 +46,18 @@ export class ListServiceLocal extends ListService {
 
     async fetchList(id) {
         await this._delay();
-        return mockList;
+        console.log(this.lists, id);
+        const list = this.lists.find(x => x.id === id);
+        if (list) {
+            return list;
+        }
+        throw new Error('List not found');
     }
 
     async createList(list) {
         console.log('[SERVICE] Create', list);
         await this._delay();
-        const index = this.lists.find(x => x.id === list.id);
-        if (index >= 0) {
-            this.lists.splice(index, 0);
-        }
+        this.lists = this.lists.filter(x => x.id !== list.id);
         this.lists.unshift(list);
         return list;
     }

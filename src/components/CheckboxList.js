@@ -72,11 +72,31 @@ export default function CheckboxList({ immutable, source = defaultSource, ...pro
   const placeholder = `Bevásárlás - ${new Date().toLocaleString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' })}`;
 
   React.useEffect(() => {
-    if (listId && listId !== 'new') {
-      setInitialLoad(true);
-      listService.fetchList(id).then(shoppingList => {
-        setShoppingList(shoppingList);
+    console.log('[CheckboxList] mount');
+    setInitialLoad(true);
+
+    if (listId && listId !== 'new') {      
+      listService.fetchList(listId)
+        .then(shoppingList => {
+          setShoppingList(shoppingList);
+          setInitialLoad(false);
+        })
+        .catch(err => {
+          setInitialLoad(false);
+          history.replace('/');
+        });
+    } else if (listId === 'new') {
+      const newList = {
+        ...shoppingList,
+        title: shoppingList.title || placeholder,
+        id: createNewId(),
+        date: new Date().toJSON()
+      };
+
+      listService.createList(newList).then(list => {
+        setShoppingList(list);
         setInitialLoad(false);
+        history.replace('/create/' + list.id)
       });
     }
   }, []);
@@ -97,13 +117,7 @@ export default function CheckboxList({ immutable, source = defaultSource, ...pro
 
   React.useEffect(() => {
     if (isLoading) {
-      const listEntity = {
-        ...shoppingList,
-        list: shoppingList.list.filter(x => !!x.label),
-        title: shoppingList.title || placeholder,
-        id: shoppingList.id === 'new' ? createNewId() : shoppingList.id,
-        date: new Date().toJSON()
-      };
+      const listEntity = shoppingList;
 
       listService.createList(listEntity).then(() => {
         setIsLoading(false);
@@ -208,7 +222,7 @@ export default function CheckboxList({ immutable, source = defaultSource, ...pro
                   className={classes.fullWidth}
                   onKeyDown={e => onKeyDown(e, value)}
                   onChange={e => onChange(e, value)}
-                  defaultValue={value.label}
+                  value={value.label}
                   placeholder={index === 0 ? 'Venni kell ...' : 'meg ööö ...'}
                   inputProps={{ 'aria-label': 'naked' }} />
             </ListItem>
@@ -220,7 +234,7 @@ export default function CheckboxList({ immutable, source = defaultSource, ...pro
               <ListItemText primary="Ennyu" />
           </ListItem> }
           <div className={classes.meta}>
-            <div>{id === 'new' || !id || ''}</div>
+            <div>{ listId || '' }</div>
             <div>{ date ? new Date(date).toLocaleString('hu-HU') : '' }</div>
           </div>    
       </List>
