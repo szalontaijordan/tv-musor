@@ -28,7 +28,7 @@ const mockActive = {
 export class ListServiceLocal extends ListService {
 
     lists = [
-        // mockList
+        mockList
     ];
 
     activeShoppings = [

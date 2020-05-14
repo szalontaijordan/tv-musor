@@ -77,6 +77,25 @@ export const useStyles = makeStyles((theme) => ({
       left: '50%',
       transform: 'translate(-50%, -50%)',
       opacity: '0.5'
+    },
+    listItem: {
+      zIndex: 2,
+      backgroundColor: 'white'
+    },
+    under: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      background: '#bdbdbd',
+      zIndex: 1
+    },
+    deleteUnder: {
+      position: 'absolute',
+      right: '34px',
+      top: '50%',
+      transform: 'translateY(-50%)'
     }
   }));
 

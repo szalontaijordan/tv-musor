@@ -6,6 +6,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import ShareIcon from '@material-ui/icons/Share';
+import DeleteIcon from '@material-ui/icons/Delete';
 import { Swipeable } from 'react-swipeable'
 
 import { ListItemSecondaryAction } from '@material-ui/core';
@@ -27,41 +28,35 @@ export default function ShoppingLists({ lists, destination = 'create' }) {
             .filter(x => x.id !== list.id)
             .concat({
                 id: list.id,
-                transform: `translateX(-${deltaX}px)`
+                right: Math.min(100, deltaX)
             });
 
         setTransitions(newTransitions);
     }
 
-    const onSwipeLeft = (e, list) => {
+    const onSwipe = (e, list) => {
         const { dir, deltaX, absX } = e;
-        const t = transitions.find(x => x.id === list.id);
+        const t = transitions.find(x => x.id === list.id) || { right: 0 };
 
-        if (t && t.transform.includes('100')) {
-            return;
-        }
+        let right = 0;
 
-        if (dir === 'Left') {
-            setDeltaX(list, deltaX);
-        }
-    };
-
-    const onSwiped = (e, list) => {
-        const { deltaX } = e;
-        if (deltaX <= 100) {
-            setDeltaX(list, 0);
-        } else {
-            setDeltaX(list, 100);
+        if (dir === 'Left' && t.right < 100) {
+            right = deltaX;
+            setDeltaX(list, right);
+        } else if (dir === 'Right') {
+            right = Math.max(0, t.right + deltaX);
+            setDeltaX(list, right);
         }
     };
 
     return <List>
         {(lists || []).map((list, index) => {
             const { title, list: items, date } = list;
-            const style = (transitions.find(x => x.id === list.id) || {}).transform || {};
+            const right = (transitions.find(x => x.id === list.id) || {}).right;
+            console.log(right);
 
-            return <Swipeable onSwiping={e => onSwipeLeft(e, list)} onSwiped={e => onSwiped(e, list)}>
-                <ListItem style={{ transform: style }} onClick={() => onClick(list)} button key={index} alignItems="flex-start">
+            return <Swipeable onSwiping={e => onSwipe(e, list)} style={{ position: 'relative' }}>
+                <ListItem style={{ right: `${right}px`, backgroundColor: 'white' }} className={classes.listItem} onClick={() => onClick(list)} button key={index} alignItems="flex-start">
                     <ListItemText
                         primary={title}
                         style={{ maxWidth: '50vw' }}
@@ -77,13 +72,18 @@ export default function ShoppingLists({ lists, destination = 'create' }) {
                             </React.Fragment>
                         }
                     />
-                    <ListItemSecondaryAction style={{ transform: style + ' translateY(-50%)' }}>
+                    <ListItemSecondaryAction style={{ right: `${right + 16}px` }}>
                         <IconButton aria-label="share">
                             <ShareIcon />
                         </IconButton>
                         { /* <SimpleMenu items={['Törlés']} /> */}
                     </ListItemSecondaryAction>
                 </ListItem>
+                <div className={classes.under}>
+                    <IconButton aria-label="delete" edge="end" className={classes.deleteUnder}>
+                        <DeleteIcon style={{ color: '#eeeeee' }}  />
+                    </IconButton>
+                </div>
             </Swipeable>
         })}
     </List>;
