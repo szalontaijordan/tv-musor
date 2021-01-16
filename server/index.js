@@ -4,7 +4,7 @@ const pino = require('express-pino-logger')();
 
 const microdata = require('microdata-node');
 const fetch = require('node-fetch');
-
+const path = require('path');
 const PORT = process.env.PORT || '5000';
 // const PORT = process.env.PORT || '3001';
 
@@ -20,7 +20,7 @@ app.get('/api', async (req, res) => {
   const channels = [
     { url: 'COMEDY', label: 'Comedy Central' },
     { url: 'FILMPLUS', label: 'Film+' },
-    { url: 'SPEKTRUM', label: 'Spektrum' }
+    { url: 'SPEKTRUM', label: 'Spektrum' },
     { url: 'RTL', label: 'RTL' },
     { url: 'TV2', label: 'TV2' },
   ];
