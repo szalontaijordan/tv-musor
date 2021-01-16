@@ -19,10 +19,10 @@ app.get('/api', async (req, res) => {
 
   const channels = [
     { url: 'COMEDY', label: 'Comedy Central' },
+    { url: 'FILMPLUS', label: 'Film+' },
+    { url: 'SPEKTRUM', label: 'Spektrum' }
     { url: 'RTL', label: 'RTL' },
     { url: 'TV2', label: 'TV2' },
-    { url: 'FILMPLUS', label: 'Film+' },
-    { url: 'DISCOVERY', label: 'Discovery' }
   ];
 
   const url = `https://musor.tv/mai/tvmusor`;
